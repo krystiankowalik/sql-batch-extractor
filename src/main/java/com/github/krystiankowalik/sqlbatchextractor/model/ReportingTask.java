@@ -17,7 +17,6 @@ public class ReportingTask {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
     private Integer id;
-    //    @Column(name = "report")
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "report_id", referencedColumnName = "id")
     private Report report;

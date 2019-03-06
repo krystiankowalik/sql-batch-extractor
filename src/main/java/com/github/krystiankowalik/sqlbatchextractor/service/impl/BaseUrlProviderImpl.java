@@ -1,6 +1,7 @@
-package com.github.krystiankowalik.sqlbatchextractor.service;
+package com.github.krystiankowalik.sqlbatchextractor.service.impl;
 
 import com.github.krystiankowalik.sqlbatchextractor.model.HostInfo;
+import com.github.krystiankowalik.sqlbatchextractor.service.BaseUrlProvider;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -11,7 +12,7 @@ import java.net.UnknownHostException;
 
 @Service
 @AllArgsConstructor(onConstructor = @__(@Autowired))
-public class EnvironmentService {
+public class BaseUrlProviderImpl implements BaseUrlProvider {
 
     private Environment environment;
 

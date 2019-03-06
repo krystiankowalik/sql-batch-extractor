@@ -11,10 +11,10 @@ import java.util.List;
 public interface DatabasesController {
 
     @GetMapping("/")
-    ResponseEntity<List<Database>> getAllQueries();
+    ResponseEntity<List<Database>> getAllDatabases();
 
 
     @PostMapping("/")
-     ResponseEntity<Database> addQuery(@RequestBody Database database);
+     ResponseEntity<Database> addDatabase(@RequestBody Database database);
 
 }

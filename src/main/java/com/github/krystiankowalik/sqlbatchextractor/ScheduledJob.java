@@ -1,10 +1,7 @@
 package com.github.krystiankowalik.sqlbatchextractor;
 
-import com.github.krystiankowalik.sqlbatchextractor.service.SqlFetchingService;
 import com.github.krystiankowalik.sqlbatchextractor.model.ReportingTask;
-import com.github.krystiankowalik.sqlbatchextractor.service.EnvironmentService;
-import com.github.krystiankowalik.sqlbatchextractor.service.ReportingTasksService;
-import com.github.krystiankowalik.sqlbatchextractor.service.SqlToCsvService;
+import com.github.krystiankowalik.sqlbatchextractor.service.*;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Random;
 
 import static com.github.krystiankowalik.sqlbatchextractor.model.ReportingTask.Status.*;
 
@@ -39,7 +33,9 @@ public class ScheduledJob {
     @NonNull
     private SqlFetchingService sqlFetchingService;
     @NonNull
-    private EnvironmentService environmentService;
+    private BaseUrlProvider baseUrlProvider;
+    @NonNull
+    private FileNameService fileNameService;
 
     @Value("${file.upload-dir}")
     private String baseFilePath;
@@ -49,13 +45,12 @@ public class ScheduledJob {
     @Qualifier("myTaskExecutor")
     private TaskExecutor taskExecutor;
 
-
-    @Scheduled(fixedRate = 10)
+    @Scheduled(fixedDelay = 100)
     public void processNextTask() {
         //Process next pending job
-        ReportingTask nextPendingTask = reportingTasksService.getNextTask(PENDING);
+        ReportingTask nextPendingTask = reportingTasksService.getFirstTaskOf(PENDING);
         if (!initializeTask(nextPendingTask)) {
-            ReportingTask nextFailedTask = reportingTasksService.getNextTask(FAILED);
+            ReportingTask nextFailedTask = reportingTasksService.getFirstTaskOf(FAILED);
             initializeTask(nextFailedTask);
         }
     }
@@ -69,7 +64,6 @@ public class ScheduledJob {
             return true;
         }
         return false;
-
     }
 
     private void submitTaskForExecution(ReportingTask reportingTask) {
@@ -78,8 +72,6 @@ public class ScheduledJob {
 
     private void completeProcessing(ReportingTask reportingTask) {
         log.info("Processing task " + reportingTask);
-
-//        waitSomeTime();
 
         String fileName = createFileName(reportingTask);
         String outputPath = createOutputPath(fileName);
@@ -101,7 +93,7 @@ public class ScheduledJob {
         }
     }
 
-    private void writeResultSetToFile(ReportingTask reportingTask, ResultSet resultSet, String fileName, String outputPath) throws SQLException {
+    private void writeResultSetToFile(ReportingTask reportingTask, ResultSet resultSet, String fileName, String outputPath) {
 
         try {
             doWriteResultSetToFile(reportingTask, resultSet, outputPath);
@@ -131,24 +123,14 @@ public class ScheduledJob {
     }
 
     private void updateCompletedReportingTask(ReportingTask reportingTask, String fileName) {
-        reportingTask.setResourceLink(environmentService.getBaseUrl() + "file/" + fileName);
+        reportingTask.setResourceLink(baseUrlProvider.getBaseUrl() + "file/" + fileName);
         reportingTasksService.save(reportingTask);
         reportingTasksService.updateTaskStatus(reportingTask, COMPLETED);
     }
 
-    private void waitSomeTime() {
-        if (new Random().nextInt(5) >= 3) {
-            try {
-                Thread.sleep(7000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private String createFileName(ReportingTask reportingTask) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH_mm_ss");
-        return reportingTask.getReport().getName() + "_" + LocalDateTime.now().format(dateTimeFormatter) + ".csv";
+        return fileNameService.getNewUniqueName(reportingTask.getReport().getName());
     }
 
     private String createOutputPath(String fileName) {

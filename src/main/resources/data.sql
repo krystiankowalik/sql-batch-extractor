@@ -4,7 +4,7 @@ delete from databases;
 
 insert into databases values ((select nextval('HIBERNATE_SEQUENCE') FROM DUAL),'my_db','jdbc:mysql://localhost:3306/split_me','split_me','password');
 insert into reports values ((select nextval('HIBERNATE_SEQUENCE') FROM DUAL),'select * from split_me2.t1','my big report',1);
-insert into reports values ((select nextval('HIBERNATE_SEQUENCE') FROM DUAL),'select * from split_me.transaction','my report',1);
+insert into reports values ((select nextval('HIBERNATE_SEQUENCE') FROM DUAL),'SELECT * FROM split_me.groups','my report',1);
 
 -- SELECT NEXTVAL('HIBERNATE_SEQUENCE') FROM DUAL;
 -- SELECT NEXTVAL('HIBERNATE_SEQUENCE') FROM DUAL;

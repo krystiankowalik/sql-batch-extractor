@@ -1,7 +1,8 @@
-package com.github.krystiankowalik.sqlbatchextractor.service;
+package com.github.krystiankowalik.sqlbatchextractor.service.impl;
 
 import com.github.krystiankowalik.sqlbatchextractor.dao.DatabasesRepo;
 import com.github.krystiankowalik.sqlbatchextractor.model.Database;
+import com.github.krystiankowalik.sqlbatchextractor.service.DatabaseService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,14 +15,13 @@ import java.util.List;
 @Transactional
 @AllArgsConstructor(onConstructor = @__(@Autowired))
 @NoArgsConstructor
-public class DatabasesService {
+public class DatabasesServiceImpl implements DatabaseService {
 
 
     private DatabasesRepo databasesRepo;
 
     public Database save(Database database) {
         return databasesRepo.save(database);
-
     }
 
     public List<Database> getAll() {
